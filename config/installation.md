@@ -84,11 +84,7 @@ smtpd_sasl_local_domain = $myhostname
 - `smtpd_sasl_security_options`: Disallows anonymous SASL authentication.
 - `smtpd_sasl_local_domain`: Sets the local domain used for SASL authentication.
 
-Save a screenshot of this configuration block as:
 
-`02-postfix-custom-settings.png`
-
-Store the image in `config/images/`.
 
 ![Postfix Custom Configuration](images/02-postfix-custom-settings.png)
 
