@@ -157,3 +157,227 @@ journalctl -u postfix -n 50 --no-pager
 **Note:** Postfix SMTP authentication also requires the appropriate SASL authentication settings and a matching Dovecot authentication socket configuration. These will be configured and tested in the relevant stages of this project.
 
 
+## Step 3: Configure Dovecot
+
+Dovecot provides IMAP and optional POP3 access to user mailboxes. In this step, configure its network listener, authentication, mailbox storage, authentication socket, and SSL settings.
+
+### 3.1 Configure the Main Dovecot File
+
+Open the main configuration file:
+
+```bash
+vim /etc/dovecot/dovecot.conf
+```
+
+Navigate to line 30:
+
+```vim
+:30
+```
+
+Press Enter, locate the `listen` parameter, and uncomment it by removing the leading `#` if present.
+
+Set the parameter to:
+
+```conf
+listen = *
+```
+
+This allows Dovecot to listen on all IPv4 interfaces. Ensure that firewall rules restrict access to the intended networks.
+
+Save and exit:
+
+```vim
+:wq
+```
+
+**Screenshot:** `03-dovecot-main-config.png`
+
+Location: `config/images/03-dovecot-main-config.png`
+
+![Dovecot Main Configuration](images/03-dovecot-main-config.png)
+
+### 3.2 Configure Authentication
+
+Open the authentication configuration file:
+
+```bash
+vim /etc/dovecot/conf.d/10-auth.conf
+```
+
+Navigate to line 10:
+
+```vim
+:10
+```
+
+Uncomment the following parameter and set its value:
+
+```conf
+disable_plaintext_auth = no
+```
+
+Next, navigate to line 100:
+
+```vim
+:100
+```
+
+Set the authentication mechanisms:
+
+```conf
+auth_mechanisms = plain login
+```
+
+Save and exit:
+
+```vim
+:wq
+```
+
+**Parameter descriptions:**
+
+- `disable_plaintext_auth = no`: Allows authentication without encryption. Use only in an isolated test environment; production deployments should protect authentication with TLS.
+- `auth_mechanisms = plain login`: Enables the PLAIN and LOGIN SASL authentication mechanisms.
+
+No screenshot is included for this configuration file.
+
+### 3.3 Configure Mailbox Storage
+
+Open the mailbox configuration file:
+
+```bash
+vim /etc/dovecot/conf.d/10-mail.conf
+```
+
+Navigate to line 24:
+
+```vim
+:24
+```
+
+Locate the `mail_location` parameter and uncomment it if necessary. Configure Maildir storage:
+
+```conf
+mail_location = maildir:~/Maildir
+```
+
+This setting stores each user's email in the `Maildir` directory inside their home directory. It should match the `home_mailbox = Maildir/` setting configured in Postfix.
+
+Save and exit:
+
+```vim
+:wq
+```
+
+**Screenshot:** `04-dovecot-mail-config.png`
+
+Location: `config/images/04-dovecot-mail-config.png`
+
+![Dovecot Mail Configuration](images/04-dovecot-mail-config.png)
+
+### 3.4 Configure the Postfix Authentication Socket
+
+Open the Dovecot master configuration file:
+
+```bash
+vim /etc/dovecot/conf.d/10-master.conf
+```
+
+Navigate to line 106:
+
+```vim
+:106
+```
+
+Locate the `unix_listener` configuration for `/var/spool/postfix/private/auth`. Uncomment the relevant block or add the following configuration inside the appropriate `service auth` section:
+
+```conf
+unix_listener /var/spool/postfix/private/auth {
+  mode = 0660
+  user = postfix
+  group = postfix
+}
+```
+
+This Unix socket allows Postfix to communicate with Dovecot for SASL authentication.
+
+The socket path must match the following Postfix setting:
+
+```conf
+smtpd_sasl_path = private/auth
+```
+
+**Security note:** This example uses mode `0660` rather than `0666` to avoid granting unnecessary access to all local users. Confirm that the socket permissions and ownership work with your Postfix and Dovecot setup.
+
+Save and exit:
+
+```vim
+:wq
+```
+
+**Screenshot:** `05-dovecot-auth-socket.png`
+
+Location: `config/images/05-dovecot-auth-socket.png`
+
+![Dovecot Authentication Socket](images/05-dovecot-auth-socket.png)
+
+### 3.5 Configure SSL
+
+Open the SSL configuration file:
+
+```bash
+vim /etc/dovecot/conf.d/10-ssl.conf
+```
+
+Locate the `ssl` parameter and set it to:
+
+```conf
+ssl = no
+```
+
+Save and exit:
+
+```vim
+:wq
+```
+
+**Important:** Disabling SSL/TLS leaves mail connections and authentication vulnerable to interception. This setting should only be used in an isolated lab environment. For an internet-facing mail server, configure TLS certificates and enable SSL/TLS before allowing real users to connect.
+
+**Screenshot:** `06-dovecot-ssl-config.png`
+
+Location: `config/images/06-dovecot-ssl-config.png`
+
+![Dovecot SSL Configuration](images/06-dovecot-ssl-config.png)
+
+### 3.6 Restart and Verify Dovecot
+
+Restart Dovecot to apply the configuration changes:
+
+```bash
+systemctl restart dovecot
+```
+
+Check the service status:
+
+```bash
+systemctl status dovecot
+```
+
+Validate the effective configuration:
+
+```bash
+doveconf -n
+```
+
+If Dovecot fails to start, inspect the service logs:
+
+```bash
+journalctl -u dovecot -n 50 --no-pager
+```
+
+Do not proceed to mail delivery testing until Dovecot starts successfully and the configuration has been verified.
+
+
+
+
