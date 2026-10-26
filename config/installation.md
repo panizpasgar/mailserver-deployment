@@ -191,9 +191,7 @@ Save and exit:
 :wq
 ```
 
-**Screenshot:** `03-dovecot-main-config.png`
 
-Location: `config/images/03-dovecot-main-config.png`
 
 ![Dovecot Main Configuration](images/03-dovecot-main-config.png)
 
@@ -240,7 +238,7 @@ Save and exit:
 - `disable_plaintext_auth = no`: Allows authentication without encryption. Use only in an isolated test environment; production deployments should protect authentication with TLS.
 - `auth_mechanisms = plain login`: Enables the PLAIN and LOGIN SASL authentication mechanisms.
 
-No screenshot is included for this configuration file.
+
 
 ### 3.3 Configure Mailbox Storage
 
@@ -270,9 +268,7 @@ Save and exit:
 :wq
 ```
 
-**Screenshot:** `04-dovecot-mail-config.png`
 
-Location: `config/images/04-dovecot-mail-config.png`
 
 ![Dovecot Mail Configuration](images/04-dovecot-mail-config.png)
 
@@ -316,9 +312,6 @@ Save and exit:
 :wq
 ```
 
-**Screenshot:** `05-dovecot-auth-socket.png`
-
-Location: `config/images/05-dovecot-auth-socket.png`
 
 ![Dovecot Authentication Socket](images/05-dovecot-auth-socket.png)
 
@@ -344,9 +337,7 @@ Save and exit:
 
 **Important:** Disabling SSL/TLS leaves mail connections and authentication vulnerable to interception. This setting should only be used in an isolated lab environment. For an internet-facing mail server, configure TLS certificates and enable SSL/TLS before allowing real users to connect.
 
-**Screenshot:** `06-dovecot-ssl-config.png`
 
-Location: `config/images/06-dovecot-ssl-config.png`
 
 ![Dovecot SSL Configuration](images/06-dovecot-ssl-config.png)
 
